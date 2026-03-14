@@ -1,0 +1,293 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FormField } from '@/lib/supabase';
+
+const FIELD_TYPES = [
+  { value: 'text', label: 'Text' },
+  { value: 'email', label: 'Email' },
+  { value: 'number', label: 'Number' },
+  { value: 'textarea', label: 'Long Text' },
+  { value: 'select', label: 'Dropdown' },
+] as const;
+
+function generateId() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+export default function FormBuilder() {
+  const router = useRouter();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [emailTo, setEmailTo] = useState('');
+  const [fields, setFields] = useState<FormField[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function addField() {
+    setFields([
+      ...fields,
+      {
+        id: generateId(),
+        label: '',
+        type: 'text',
+        required: false,
+        placeholder: '',
+        options: [],
+      },
+    ]);
+  }
+
+  function updateField(index: number, updates: Partial<FormField>) {
+    setFields(fields.map((f, i) => (i === index ? { ...f, ...updates } : f)));
+  }
+
+  function removeField(index: number) {
+    setFields(fields.filter((_, i) => i !== index));
+  }
+
+  function moveField(index: number, direction: -1 | 1) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= fields.length) return;
+    const updated = [...fields];
+    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
+    setFields(updated);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+
+    if (!title.trim()) return setError('Give your form a title');
+    if (!emailTo.trim()) return setError('Enter an email to receive submissions');
+    if (fields.length === 0) return setError('Add at least one field');
+    if (fields.some((f) => !f.label.trim())) return setError('All fields need a label');
+
+    const selectWithoutOptions = fields.find(
+      (f) => f.type === 'select' && (!f.options || f.options.length === 0)
+    );
+    if (selectWithoutOptions)
+      return setError(`Dropdown "${selectWithoutOptions.label}" needs at least one option`);
+
+    setSaving(true);
+    try {
+      const res = await fetch('/api/forms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, fields, email_to: emailTo }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error || 'Failed to create form');
+      }
+
+      const { id } = await res.json();
+      router.push(`/forms/${id}`);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Form Meta */}
+      <div className="space-y-4 animate-fade-up">
+        <div>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Form title"
+            className="w-full text-3xl font-display bg-transparent border-none focus:ring-0 focus:shadow-none placeholder:text-muted/40 p-0"
+            style={{ boxShadow: 'none' }}
+          />
+        </div>
+        <div>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Optional description..."
+            className="w-full text-base bg-transparent border-none focus:ring-0 focus:shadow-none placeholder:text-muted/40 text-muted p-0"
+            style={{ boxShadow: 'none' }}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-muted mb-1.5">
+            Send submissions to
+          </label>
+          <input
+            type="email"
+            value={emailTo}
+            onChange={(e) => setEmailTo(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full border border-border rounded-lg px-3 py-2.5 bg-white text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Fields */}
+      <div className="space-y-3 animate-fade-up-delay">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">
+            Fields
+          </h3>
+          <span className="text-xs text-muted">{fields.length} field{fields.length !== 1 && 's'}</span>
+        </div>
+
+        {fields.length === 0 && (
+          <div className="border-2 border-dashed border-border rounded-xl p-8 text-center">
+            <p className="text-muted text-sm">No fields yet. Add your first one below.</p>
+          </div>
+        )}
+
+        {fields.map((field, index) => (
+          <div
+            key={field.id}
+            className="bg-white border border-border rounded-xl p-4 space-y-3 hover:border-accent/30 transition-colors"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex flex-col gap-0.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => moveField(index, -1)}
+                  className="text-muted hover:text-ink text-xs p-0.5"
+                  disabled={index === 0}
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveField(index, 1)}
+                  className="text-muted hover:text-ink text-xs p-0.5"
+                  disabled={index === fields.length - 1}
+                >
+                  ▼
+                </button>
+              </div>
+
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={field.label}
+                  onChange={(e) => updateField(index, { label: e.target.value })}
+                  placeholder="Field label"
+                  className="border border-border rounded-lg px-3 py-2 text-sm bg-surface"
+                />
+                <select
+                  value={field.type}
+                  onChange={(e) =>
+                    updateField(index, {
+                      type: e.target.value as FormField['type'],
+                      options: e.target.value === 'select' ? [''] : [],
+                    })
+                  }
+                  className="border border-border rounded-lg px-3 py-2 text-sm bg-surface"
+                >
+                  {FIELD_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={field.placeholder || ''}
+                  onChange={(e) => updateField(index, { placeholder: e.target.value })}
+                  placeholder="Placeholder text (optional)"
+                  className="border border-border rounded-lg px-3 py-2 text-sm bg-surface"
+                />
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={field.required}
+                    onChange={(e) => updateField(index, { required: e.target.checked })}
+                    className="rounded border-border accent-accent"
+                  />
+                  Required
+                </label>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => removeField(index)}
+                className="text-muted hover:text-red-500 text-lg px-1 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Select field options */}
+            {field.type === 'select' && (
+              <div className="ml-8 space-y-2">
+                <p className="text-xs text-muted font-medium">Dropdown options:</p>
+                {(field.options || []).map((opt, optIdx) => (
+                  <div key={optIdx} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={opt}
+                      onChange={(e) => {
+                        const newOpts = [...(field.options || [])];
+                        newOpts[optIdx] = e.target.value;
+                        updateField(index, { options: newOpts });
+                      }}
+                      placeholder={`Option ${optIdx + 1}`}
+                      className="flex-1 border border-border rounded-lg px-3 py-1.5 text-sm bg-surface"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newOpts = (field.options || []).filter((_, i) => i !== optIdx);
+                        updateField(index, { options: newOpts });
+                      }}
+                      className="text-muted hover:text-red-500 text-sm px-2"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateField(index, { options: [...(field.options || []), ''] })
+                  }
+                  className="text-xs text-accent hover:underline"
+                >
+                  + Add option
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={addField}
+          className="w-full border-2 border-dashed border-border rounded-xl py-3 text-sm text-muted hover:border-accent hover:text-accent transition-colors"
+        >
+          + Add Field
+        </button>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={saving}
+        className="w-full bg-accent text-white py-3 rounded-xl font-semibold text-base hover:bg-accent/90 disabled:opacity-50 transition-colors"
+      >
+        {saving ? 'Creating...' : 'Create Form'}
+      </button>
+    </form>
+  );
+}
