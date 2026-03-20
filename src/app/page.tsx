@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase-server';
 import SignOutButton from '@/components/SignOutButton';
+import DeleteFormButton from '@/components/DeleteFormButton';
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
@@ -53,14 +54,16 @@ export default async function DashboardPage() {
                 ? (form.submissions[0] as { count: number }).count
                 : 0;
             return (
-              <Link
+              <div
                 key={form.id}
-                href={`/forms/${form.id}`}
                 className="flex items-center justify-between border border-border rounded-xl px-5 py-4 bg-white hover:border-accent/40 hover:shadow-sm transition-all"
               >
-                <span className="font-medium text-ink">{form.title || 'Untitled Form'}</span>
-                <span className="text-sm text-muted">{count} submission{count !== 1 ? 's' : ''}</span>
-              </Link>
+                <Link href={`/forms/${form.id}`} className="flex-1 flex items-center justify-between mr-4">
+                  <span className="font-medium text-ink">{form.title || 'Untitled Form'}</span>
+                  <span className="text-sm text-muted">{count} submission{count !== 1 ? 's' : ''}</span>
+                </Link>
+                <DeleteFormButton formId={form.id} />
+              </div>
             );
           })}
         </div>

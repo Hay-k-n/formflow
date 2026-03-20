@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase-server';
 
 // GET /api/forms — list all forms
 export async function GET() {
@@ -19,6 +20,11 @@ export async function GET() {
 
 // POST /api/forms — create a new form
 export async function POST(req: NextRequest) {
+  const { data: { user } } = await createServerSupabase().auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await req.json();
   const { title, description, fields, email_to } = body;
 
@@ -37,6 +43,7 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase
     .from('forms')
     .insert({
+      user_id: user.id,
       title: title.trim(),
       description: description?.trim() || '',
       fields,
