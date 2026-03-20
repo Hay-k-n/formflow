@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase-server';
+import SignOutButton from '@/components/SignOutButton';
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
@@ -23,12 +24,15 @@ export default async function DashboardPage() {
           <h1 className="font-display text-3xl text-ink">Your Forms</h1>
           <p className="text-muted text-sm mt-1">{user.email}</p>
         </div>
-        <Link
-          href="/forms/new"
-          className="bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-ink/90 transition-colors"
-        >
-          + New Form
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/forms/new"
+            className="bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-ink/90 transition-colors"
+          >
+            + New Form
+          </Link>
+          <SignOutButton />
+        </div>
       </div>
 
       {!forms || forms.length === 0 ? (
