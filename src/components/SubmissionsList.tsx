@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Form, Submission } from '@/lib/supabase';
 
 export default function SubmissionsList({
@@ -9,18 +11,45 @@ export default function SubmissionsList({
   form: Form;
   submissions: Submission[];
 }) {
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/f/${form.id}`;
 
   function copyLink() {
     navigator.clipboard.writeText(publicUrl);
   }
 
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/forms/${form.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        router.push('/');
+        router.refresh();
+      }
+    } catch {
+      setDeleting(false);
+      setShowConfirm(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="animate-fade-up">
-        <h1 className="font-display text-3xl text-ink mb-1">{form.title}</h1>
-        {form.description && <p className="text-muted mb-3">{form.description}</p>}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-display text-3xl text-ink mb-1">{form.title}</h1>
+            {form.description && <p className="text-muted mb-3">{form.description}</p>}
+          </div>
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="text-sm text-muted hover:text-red-500 transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-red-300 shrink-0"
+          >
+            Delete
+          </button>
+        </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="text-muted">
             Emails go to <strong className="text-ink">{form.email_to}</strong>
@@ -31,6 +60,30 @@ export default function SubmissionsList({
           </span>
         </div>
       </div>
+
+      {/* Delete confirmation */}
+      {showConfirm && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p className="text-sm text-red-800 mb-3">
+            Delete <strong>"{form.title}"</strong> and all its submissions? This cannot be undone.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+            >
+              {deleting ? 'Deleting...' : 'Yes, delete it'}
+            </button>
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="bg-white text-ink px-4 py-2 rounded-lg text-sm font-medium border border-border hover:bg-surface transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Share link */}
       <div className="bg-white border border-border rounded-xl p-4 animate-fade-up-delay">
@@ -71,7 +124,6 @@ export default function SubmissionsList({
                     {submissions.length - idx}
                   </span>
                   <span className="text-sm text-ink font-medium">
-                    {/* Show first field value as preview */}
                     {form.fields[0] && sub.data[form.fields[0].id]
                       ? String(sub.data[form.fields[0].id]).slice(0, 50)
                       : 'Submission'}
