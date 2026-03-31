@@ -13,7 +13,7 @@ export function getSupabaseAdmin() {
 export interface FormField {
   id: string;
   label: string;
-  type: 'text' | 'email' | 'number' | 'textarea' | 'select';
+  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'multiselect';
   required: boolean;
   placeholder?: string;
   options?: string[]; // for select fields

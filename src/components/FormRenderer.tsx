@@ -19,7 +19,7 @@ export default function FormRenderer({ form }: { form: Form }) {
 
     // Validate required fields
     for (const field of form.fields) {
-      if (field.required && !formData[field.id]?.trim()) {
+      if (field.required && !formData[field.id]?.trim() && !formData[field.id]?.split(',').filter(Boolean).length) {
         setError(`"${field.label}" is required`);
         return;
       }
@@ -98,6 +98,29 @@ export default function FormRenderer({ form }: { form: Form }) {
                   </option>
                 ))}
               </select>
+            ) : field.type === 'multiselect' ? (
+              <div className="space-y-2">
+                {(field.options || []).map((opt) => {
+                  const selected = (formData[field.id] || '').split(',').filter(Boolean);
+                  const checked = selected.includes(opt);
+                  return (
+                    <label key={opt} className="flex items-center gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          const next = checked
+                            ? selected.filter((v) => v !== opt)
+                            : [...selected, opt];
+                          updateValue(field.id, next.join(','));
+                        }}
+                        className="rounded border-border accent-accent w-4 h-4"
+                      />
+                      <span className="text-sm text-ink">{opt}</span>
+                    </label>
+                  );
+                })}
+              </div>
             ) : (
               <input
                 type={field.type}

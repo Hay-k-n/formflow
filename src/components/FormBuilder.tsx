@@ -10,6 +10,7 @@ const FIELD_TYPES = [
   { value: 'number', label: 'Number' },
   { value: 'textarea', label: 'Long Text' },
   { value: 'select', label: 'Dropdown' },
+  { value: 'multiselect', label: 'Multi-select' },
 ] as const;
 
 function generateId() {
@@ -65,10 +66,10 @@ export default function FormBuilder() {
     if (fields.some((f) => !f.label.trim())) return setError('All fields need a label');
 
     const selectWithoutOptions = fields.find(
-      (f) => f.type === 'select' && (!f.options || f.options.length === 0)
+      (f) => (f.type === 'select' || f.type === 'multiselect') && (!f.options || f.options.length === 0)
     );
     if (selectWithoutOptions)
-      return setError(`Dropdown "${selectWithoutOptions.label}" needs at least one option`);
+      return setError(`"${selectWithoutOptions.label}" needs at least one option`);
 
     setSaving(true);
     try {
@@ -183,7 +184,7 @@ export default function FormBuilder() {
                   onChange={(e) =>
                     updateField(index, {
                       type: e.target.value as FormField['type'],
-                      options: e.target.value === 'select' ? [''] : [],
+                      options: e.target.value === 'select' || e.target.value === 'multiselect' ? [''] : [],
                     })
                   }
                   className="border border-border rounded-lg px-3 py-2 text-sm bg-surface"
@@ -221,10 +222,12 @@ export default function FormBuilder() {
               </button>
             </div>
 
-            {/* Select field options */}
-            {field.type === 'select' && (
+            {/* Select / Multi-select options */}
+            {(field.type === 'select' || field.type === 'multiselect') && (
               <div className="ml-8 space-y-2">
-                <p className="text-xs text-muted font-medium">Dropdown options:</p>
+                <p className="text-xs text-muted font-medium">
+                  {field.type === 'multiselect' ? 'Multi-select options:' : 'Dropdown options:'}
+                </p>
                 {(field.options || []).map((opt, optIdx) => (
                   <div key={optIdx} className="flex gap-2">
                     <input
