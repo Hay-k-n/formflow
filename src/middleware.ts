@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
   const isPublic =
     path.startsWith('/f/') ||           // Public form pages
     path.startsWith('/api/submit/') ||   // Public submission endpoint
+    path === '/api/auth/signup' ||       // Public signup endpoint
     path === '/login' ||                 // Login page
     path === '/signup' ||                // Signup page
     path.startsWith('/auth/callback') || // Supabase email confirmation
