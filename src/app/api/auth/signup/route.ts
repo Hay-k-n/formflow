@@ -31,9 +31,7 @@ export async function POST(request: NextRequest) {
     email,
     password,
     email_confirm: false,
-    options: {
-      email_redirect_to: `${appUrl}/auth/callback`,
-    },
+    email_redirect_to: `${appUrl}/auth/callback`,
   });
 
   if (error) {
