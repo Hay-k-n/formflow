@@ -25,13 +25,10 @@ export async function POST(request: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
   const { error } = await supabase.auth.admin.createUser({
     email,
     password,
     email_confirm: false,
-    email_redirect_to: `${appUrl}/auth/callback`,
   });
 
   if (error) {
