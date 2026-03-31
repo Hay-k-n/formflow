@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase-browser';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -14,21 +13,27 @@ export default function SignupPage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+
+    // Client-side domain check for fast feedback
+    const domain = email.split('@')[1]?.toLowerCase();
+    if (domain !== 'ucena.com') {
+      setError('Only @ucena.com email addresses are allowed.');
+      return;
+    }
+
     setLoading(true);
 
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
-      },
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     });
 
+    const data = await res.json();
     setLoading(false);
 
-    if (authError) {
-      setError(authError.message);
+    if (!res.ok) {
+      setError(data.error || 'Something went wrong.');
       return;
     }
 
@@ -73,7 +78,7 @@ export default function SignupPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="you@ucena.com"
               required
               className="w-full border border-border rounded-lg px-3 py-2.5 bg-white text-sm"
             />
