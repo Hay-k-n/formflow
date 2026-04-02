@@ -12,7 +12,7 @@ export async function sendSubmissionEmail({
   pdfBuffer: Buffer;
 }) {
   const { data, error } = await resend.emails.send({
-    from: 'FormFlow <onboarding@resend.dev>',
+    from: 'FormFlow <noreply@ucena.com>',
     to: [to],
     subject: `New submission: ${formTitle}`,
     html: `
