@@ -43,12 +43,20 @@ export default function SubmissionsList({
             <h1 className="font-display text-3xl text-ink mb-1">{form.title}</h1>
             {form.description && <p className="text-muted mb-3">{form.description}</p>}
           </div>
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="text-sm text-muted hover:text-red-500 transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-red-300 shrink-0"
-          >
-            Delete
-          </button>
+          <div className="flex gap-2 shrink-0">
+            <a
+              href={`/forms/${form.id}/edit`}
+              className="text-sm text-muted hover:text-ink transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-ink/30"
+            >
+              Edit
+            </a>
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="text-sm text-muted hover:text-red-500 transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-red-300"
+            >
+              Delete
+            </button>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="text-muted">

@@ -21,6 +21,33 @@ export async function GET(
   return NextResponse.json(data);
 }
 
+// PUT /api/forms/[id]
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const supabase = getSupabaseAdmin();
+  const body = await req.json();
+  const { title, description, fields, email_to } = body;
+
+  if (!title || !email_to || !fields) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from('forms')
+    .update({ title, description, fields, email_to })
+    .eq('id', params.id)
+    .select()
+    .single();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
+}
+
 // DELETE /api/forms/[id]
 export async function DELETE(
   _req: NextRequest,

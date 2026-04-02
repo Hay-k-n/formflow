@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FormField } from '@/lib/supabase';
+import { Form, FormField } from '@/lib/supabase';
 
 const FIELD_TYPES = [
   { value: 'text', label: 'Text' },
@@ -17,12 +17,12 @@ function generateId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-export default function FormBuilder() {
+export default function FormBuilder({ form }: { form?: Form }) {
   const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [emailTo, setEmailTo] = useState('');
-  const [fields, setFields] = useState<FormField[]>([]);
+  const [title, setTitle] = useState(form?.title ?? '');
+  const [description, setDescription] = useState(form?.description ?? '');
+  const [emailTo, setEmailTo] = useState(form?.email_to ?? '');
+  const [fields, setFields] = useState<FormField[]>(form?.fields ?? []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -73,19 +73,21 @@ export default function FormBuilder() {
 
     setSaving(true);
     try {
-      const res = await fetch('/api/forms', {
-        method: 'POST',
+      const url = form ? `/api/forms/${form.id}` : '/api/forms';
+      const method = form ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, fields, email_to: emailTo }),
       });
 
       if (!res.ok) {
         const body = await res.json();
-        throw new Error(body.error || 'Failed to create form');
+        throw new Error(body.error || (form ? 'Failed to update form' : 'Failed to create form'));
       }
 
       const { id } = await res.json();
-      router.push(`/forms/${id}`);
+      router.push(`/forms/${form?.id ?? id}`);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -289,7 +291,7 @@ export default function FormBuilder() {
         disabled={saving}
         className="w-full bg-accent text-white py-3 rounded-xl font-semibold text-base hover:bg-accent/90 disabled:opacity-50 transition-colors"
       >
-        {saving ? 'Creating...' : 'Create Form'}
+        {saving ? (form ? 'Saving...' : 'Creating...') : (form ? 'Save Changes' : 'Create Form')}
       </button>
     </form>
   );
