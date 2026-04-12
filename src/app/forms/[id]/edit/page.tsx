@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
 import Navbar from '@/components/Navbar';
 import FormBuilder from '@/components/FormBuilder';
 import { getSupabaseAdmin, Form } from '@/lib/supabase';

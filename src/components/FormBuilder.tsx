@@ -88,6 +88,7 @@ export default function FormBuilder({ form }: { form?: Form }) {
 
       const { id } = await res.json();
       router.push(`/forms/${form?.id ?? id}`);
+      router.refresh();
     } catch (err: any) {
       setError(err.message);
     } finally {
