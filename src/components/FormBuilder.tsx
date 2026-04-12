@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Form, FormField } from '@/lib/supabase';
 
 const FIELD_TYPES = [
@@ -18,7 +17,6 @@ function generateId() {
 }
 
 export default function FormBuilder({ form }: { form?: Form }) {
-  const router = useRouter();
   const [title, setTitle] = useState(form?.title ?? '');
   const [description, setDescription] = useState(form?.description ?? '');
   const [emailTo, setEmailTo] = useState(form?.email_to ?? '');
@@ -87,8 +85,7 @@ export default function FormBuilder({ form }: { form?: Form }) {
       }
 
       const { id } = await res.json();
-      router.push(`/forms/${form?.id ?? id}`);
-      router.refresh();
+      window.location.href = `/forms/${form?.id ?? id}`;
     } catch (err: any) {
       setError(err.message);
     } finally {
