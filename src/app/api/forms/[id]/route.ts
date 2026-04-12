@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
 // GET /api/forms/[id]
@@ -44,6 +45,9 @@ export async function PUT(
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  revalidatePath(`/forms/${params.id}`);
+  revalidatePath(`/forms/${params.id}/edit`);
 
   return NextResponse.json(data);
 }
