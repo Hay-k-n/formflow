@@ -55,6 +55,11 @@ export default function FormRenderer({ form }: { form: Form }) {
     e.preventDefault();
     setError('');
 
+    if (!isLastPage) {
+      handleNext();
+      return;
+    }
+
     const err = validatePage(currentPage);
     if (err) { setError(err); return; }
 
