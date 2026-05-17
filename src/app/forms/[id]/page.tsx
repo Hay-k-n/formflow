@@ -1,7 +1,8 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import SubmissionsList from '@/components/SubmissionsList';
-import { getSupabaseAdmin, Form, Submission } from '@/lib/supabase';
+import { Form, Submission } from '@/lib/supabase';
+import { createServerSupabase } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,13 +11,17 @@ export default async function FormDetailPage({
 }: {
   params: { id: string };
 }) {
-  const supabase = getSupabaseAdmin();
+  const supabase = createServerSupabase();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   // Fetch form
   const { data: form, error: formError } = await supabase
     .from('forms')
     .select('*')
     .eq('id', params.id)
+    .eq('user_id', user.id)
     .single();
 
   if (formError || !form) {
