@@ -10,7 +10,7 @@ const FIELD_TYPES = [
   { value: 'textarea', label: 'Long Text' },
   { value: 'select', label: 'Dropdown' },
   { value: 'multiselect', label: 'Multi-select' },
-  { value: 'datetime', label: 'Date & Time' },
+  { value: 'datetime', label: 'Date' },
 ] as const;
 
 function generateId() {

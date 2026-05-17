@@ -162,7 +162,7 @@ export default function FormRenderer({ form }: { form: Form }) {
               </div>
             ) : field.type === 'datetime' ? (
               <input
-                type="datetime-local"
+                type="date"
                 value={formData[field.id] || ''}
                 onChange={(e) => updateValue(field.id, e.target.value)}
                 className="w-full border border-border rounded-lg px-3 py-2.5 bg-white text-sm"
