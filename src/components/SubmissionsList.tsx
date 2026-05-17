@@ -15,6 +15,7 @@ export default function SubmissionsList({
   const [deleting, setDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
   const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/f/${form.id}`;
 
@@ -90,13 +91,31 @@ export default function SubmissionsList({
             >
               Edit
             </a>
-            <button
-              onClick={handleDuplicate}
-              disabled={duplicating}
-              className="text-sm text-muted hover:text-ink transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-ink/30 disabled:opacity-50"
-            >
-              {duplicating ? 'Duplicating...' : 'Duplicate'}
-            </button>
+            {showDuplicateConfirm ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted">Duplicate?</span>
+                <button
+                  onClick={() => { setShowDuplicateConfirm(false); handleDuplicate(); }}
+                  disabled={duplicating}
+                  className="text-sm font-medium text-ink hover:text-accent transition-colors disabled:opacity-50"
+                >
+                  {duplicating ? 'Duplicating...' : 'Yes'}
+                </button>
+                <button
+                  onClick={() => setShowDuplicateConfirm(false)}
+                  className="text-sm text-muted hover:text-ink transition-colors"
+                >
+                  No
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowDuplicateConfirm(true)}
+                className="text-sm text-muted hover:text-ink transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-ink/30"
+              >
+                Duplicate
+              </button>
+            )}
             <button
               onClick={() => setShowConfirm(true)}
               className="text-sm text-muted hover:text-red-500 transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-red-300"
