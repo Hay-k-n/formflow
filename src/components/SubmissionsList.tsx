@@ -91,31 +91,12 @@ export default function SubmissionsList({
             >
               Edit
             </a>
-            {showDuplicateConfirm ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted">Duplicate?</span>
-                <button
-                  onClick={() => { setShowDuplicateConfirm(false); handleDuplicate(); }}
-                  disabled={duplicating}
-                  className="text-sm font-medium text-ink hover:text-accent transition-colors disabled:opacity-50"
-                >
-                  {duplicating ? 'Duplicating...' : 'Yes'}
-                </button>
-                <button
-                  onClick={() => setShowDuplicateConfirm(false)}
-                  className="text-sm text-muted hover:text-ink transition-colors"
-                >
-                  No
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowDuplicateConfirm(true)}
-                className="text-sm text-muted hover:text-ink transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-ink/30"
-              >
-                Duplicate
-              </button>
-            )}
+            <button
+              onClick={() => setShowDuplicateConfirm(true)}
+              className="text-sm text-muted hover:text-orange-500 transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-orange-300"
+            >
+              Duplicate
+            </button>
             <button
               onClick={() => setShowConfirm(true)}
               className="text-sm text-muted hover:text-red-500 transition-colors px-3 py-1.5 border border-border rounded-lg hover:border-red-300"
@@ -134,6 +115,30 @@ export default function SubmissionsList({
           </span>
         </div>
       </div>
+
+      {/* Duplicate confirmation */}
+      {showDuplicateConfirm && (
+        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+          <p className="text-sm text-orange-800 mb-3">
+            Duplicate <strong>"{form.title}"</strong>? A copy will be created with no submissions.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleDuplicate}
+              disabled={duplicating}
+              className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-600 disabled:opacity-50 transition-colors"
+            >
+              {duplicating ? 'Duplicating...' : 'Yes, duplicate it'}
+            </button>
+            <button
+              onClick={() => setShowDuplicateConfirm(false)}
+              className="bg-white text-ink px-4 py-2 rounded-lg text-sm font-medium border border-border hover:bg-surface transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Delete confirmation */}
       {showConfirm && (
