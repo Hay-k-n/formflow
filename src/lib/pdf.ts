@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import { Form, FormField } from './supabase';
+import { Form } from './supabase';
 
 export function generateSubmissionPDF(
   form: Form,
@@ -7,13 +7,24 @@ export function generateSubmissionPDF(
 ): Buffer {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   const contentWidth = pageWidth - margin * 2;
+  const bottomMargin = pageHeight - 20;
   let y = 25;
+
+  function ensureSpace(needed: number) {
+    if (y + needed > bottomMargin) {
+      doc.addPage();
+      y = 25;
+    }
+  }
 
   // Title
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0, 0, 0);
+  ensureSpace(12);
   doc.text(form.title, margin, y);
   y += 10;
 
@@ -22,8 +33,10 @@ export function generateSubmissionPDF(
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(120, 120, 120);
-    doc.text(form.description, margin, y, { maxWidth: contentWidth });
-    y += 8;
+    const descLines = doc.splitTextToSize(form.description, contentWidth);
+    ensureSpace(descLines.length * 5 + 3);
+    doc.text(descLines, margin, y);
+    y += descLines.length * 5 + 3;
   }
 
   // Divider line
@@ -37,56 +50,67 @@ export function generateSubmissionPDF(
   doc.text(`Submitted: ${new Date().toLocaleString()}`, margin, y);
   y += 14;
 
-  // Fields and values
-  doc.setTextColor(0, 0, 0);
-
+  // Fields
   for (const field of form.fields) {
-    // Check if we need a new page
-    if (y > 260) {
-      doc.addPage();
-      y = 25;
+    if (field.type === 'page_break') continue;
+
+    const raw = data[field.id] || '';
+    let displayLines: string[];
+
+    if (!raw) {
+      displayLines = ['(empty)'];
+    } else if (field.type === 'multiselect') {
+      const selections = raw.split('\n').filter(Boolean);
+      displayLines = selections.length > 0 ? selections : ['(empty)'];
+    } else {
+      displayLines = [raw];
     }
 
-    // Field label
+    // Pre-calculate heights
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    const labelLines = doc.splitTextToSize(field.label, contentWidth);
+    const labelH = labelLines.length * 5.5;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    // Wrap each display line individually then flatten
+    const wrappedValueLines: string[] = displayLines.flatMap((line) =>
+      doc.splitTextToSize(line, contentWidth)
+    );
+    const valueH = wrappedValueLines.length * 5.5;
+
+    // Add new page if the whole block doesn't fit
+    ensureSpace(labelH + valueH + 12);
+
+    // Label
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(80, 80, 80);
-    doc.text(field.label, margin, y);
-    y += 6;
+    doc.text(labelLines, margin, y);
+    y += labelH + 1;
 
-    // Field value
-    const value = data[field.id] || '(empty)';
+    // Value
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(30, 30, 30);
-
-    if (field.type === 'textarea' && value.length > 80) {
-      const lines = doc.splitTextToSize(value, contentWidth);
-      doc.text(lines, margin, y);
-      y += lines.length * 5.5;
-    } else {
-      doc.text(value, margin, y);
-      y += 6;
-    }
-
-    y += 8;
+    doc.text(wrappedValueLines, margin, y);
+    y += valueH + 10;
   }
 
-  // Footer
+  // Footer on every page
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(180, 180, 180);
     doc.text(
-      `FormFlow — Page ${i} of ${pageCount}`,
+      `Ucena Technologies — Page ${i} of ${pageCount}`,
       pageWidth / 2,
-      doc.internal.pageSize.getHeight() - 10,
+      pageHeight - 10,
       { align: 'center' }
     );
   }
 
-  // Return as Buffer for server-side use
-  const arrayBuffer = doc.output('arraybuffer');
-  return Buffer.from(arrayBuffer);
+  return Buffer.from(doc.output('arraybuffer'));
 }
