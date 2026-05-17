@@ -51,15 +51,8 @@ export default function FormRenderer({ form }: { form: Form }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit() {
     setError('');
-
-    if (!isLastPage) {
-      handleNext();
-      return;
-    }
-
     const err = validatePage(currentPage);
     if (err) { setError(err); return; }
 
@@ -99,7 +92,7 @@ export default function FormRenderer({ form }: { form: Form }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
       <div className="animate-fade-up">
         <h1 className="font-display text-3xl text-ink mb-1">{form.title}</h1>
         {form.description && (
@@ -205,7 +198,8 @@ export default function FormRenderer({ form }: { form: Form }) {
         )}
         {isLastPage ? (
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             disabled={submitting}
             className="flex-1 bg-accent text-white py-3 rounded-xl font-semibold text-base hover:bg-accent/90 disabled:opacity-50 transition-colors"
           >
