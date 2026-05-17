@@ -14,7 +14,7 @@ export default async function PublicFormPage({
   const { data: form, error } = await supabase
     .from('forms')
     .select('*')
-    .eq('id', params.id)
+    .eq('link_token', params.id)
     .single();
 
   if (error || !form) {

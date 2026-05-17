@@ -14,7 +14,7 @@ export async function POST(
   const { data: form, error: formError } = await supabase
     .from('forms')
     .select('*')
-    .eq('id', params.id)
+    .eq('link_token', params.id)
     .single();
 
   if (formError || !form) {

@@ -17,7 +17,10 @@ export default function SubmissionsList({
   const [duplicating, setDuplicating] = useState(false);
   const [showDuplicateConfirm, setShowDuplicateConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
-  const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/f/${form.id}`;
+  const [linkToken, setLinkToken] = useState(form.link_token);
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/f/${linkToken}`;
 
   function copyLink() {
     const copy = (text: string) => {
@@ -40,6 +43,20 @@ export default function SubmissionsList({
 
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleRegenerate() {
+    setRegenerating(true);
+    try {
+      const res = await fetch(`/api/forms/${form.id}/regenerate-token`, { method: 'POST' });
+      if (res.ok) {
+        const { link_token } = await res.json();
+        setLinkToken(link_token);
+        setShowRegenerateModal(false);
+      }
+    } finally {
+      setRegenerating(false);
+    }
   }
 
   async function handleDuplicate() {
@@ -182,8 +199,44 @@ export default function SubmissionsList({
           >
             {copied ? 'Copied!' : 'Copy'}
           </button>
+          <button
+            onClick={() => setShowRegenerateModal(true)}
+            title="Regenerate public link"
+            className="border border-border bg-white p-2 rounded-lg hover:border-ink/30 transition-colors"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-muted">
+              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Regenerate link modal */}
+      {showRegenerateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <h3 className="font-display text-xl text-ink mb-2">Regenerate public link?</h3>
+            <p className="text-sm text-muted mb-6">
+              All previously shared links for this form will immediately stop working. Only the new link will be valid.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleRegenerate}
+                disabled={regenerating}
+                className="flex-1 bg-accent text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-accent/90 disabled:opacity-50 transition-colors"
+              >
+                {regenerating ? 'Regenerating...' : 'Yes, regenerate'}
+              </button>
+              <button
+                onClick={() => setShowRegenerateModal(false)}
+                className="flex-1 border border-border text-ink py-2.5 rounded-xl text-sm font-semibold hover:bg-surface transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Submissions */}
       {submissions.length === 0 ? (

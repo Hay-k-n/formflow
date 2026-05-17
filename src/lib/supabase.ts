@@ -21,6 +21,7 @@ export interface FormField {
 
 export interface Form {
   id: string;
+  link_token: string;
   title: string;
   description: string;
   fields: FormField[];
