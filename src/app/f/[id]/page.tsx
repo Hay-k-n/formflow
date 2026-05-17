@@ -25,7 +25,7 @@ export default async function PublicFormPage({
     <>
       <header className="w-full bg-[#1e2024] px-6 py-4">
         <div className="max-w-lg mx-auto flex items-center gap-3">
-          <span className="text-white font-bold tracking-[0.2em] text-xl">UCENA</span>
+          <img src="/ucena-logo.png" alt="UCENA" className="h-8 w-auto" />
         </div>
       </header>
       <main className="min-h-screen flex items-start justify-center pt-10 pb-20 px-4">
