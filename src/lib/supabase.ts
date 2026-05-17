@@ -16,7 +16,8 @@ export interface FormField {
   type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'multiselect' | 'page_break' | 'datetime' | 'organization';
   required: boolean;
   placeholder?: string;
-  options?: string[]; // for select fields
+  comment?: string;
+  options?: string[];
 }
 
 export interface Form {

@@ -111,10 +111,13 @@ export default function FormRenderer({ form }: { form: Form }) {
       <div className="space-y-5 animate-fade-up-delay">
         {pageFields.map((field) => (
           <div key={field.id}>
-            <label className="block text-sm font-medium text-ink mb-1.5">
+            <label className="block text-sm font-medium text-ink mb-1">
               {field.label}
               {field.required && <span className="text-accent ml-1">*</span>}
             </label>
+            {field.comment && (
+              <p className="text-xs text-[#555] mb-1.5">{field.comment}</p>
+            )}
 
             {field.type === 'textarea' ? (
               <textarea

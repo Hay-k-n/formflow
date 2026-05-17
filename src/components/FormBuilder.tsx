@@ -254,6 +254,17 @@ export default function FormBuilder({ form }: { form?: Form }) {
               </button>
             </div>
 
+            {/* Comment */}
+            <div className="ml-8">
+              <input
+                type="text"
+                value={field.comment || ''}
+                onChange={(e) => updateField(index, { comment: e.target.value })}
+                placeholder="Helper comment shown to form filler (optional)"
+                className="w-full border border-border rounded-lg px-3 py-2 text-sm bg-surface text-muted"
+              />
+            </div>
+
             {/* Select / Multi-select options */}
             {(field.type === 'select' || field.type === 'multiselect') && (
               <div className="ml-8 space-y-2">
