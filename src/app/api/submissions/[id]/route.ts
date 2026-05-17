@@ -34,15 +34,19 @@ export async function DELETE(
 
   const supabase = getSupabaseAdmin();
 
-  // Only allow deletion if the submission belongs to a form owned by this user
+  // Fetch this user's form IDs, then verify the submission belongs to one of them
+  const { data: forms } = await supabase
+    .from('forms')
+    .select('id')
+    .eq('user_id', user.id);
+
+  const formIds = (forms || []).map((f) => f.id);
+
   const { error } = await supabase
     .from('submissions')
     .delete()
     .eq('id', params.id)
-    .in(
-      'form_id',
-      supabase.from('forms').select('id').eq('user_id', user.id)
-    );
+    .in('form_id', formIds);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
