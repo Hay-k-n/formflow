@@ -14,10 +14,30 @@ export default function SubmissionsList({
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [copied, setCopied] = useState(false);
   const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/f/${form.id}`;
 
   function copyLink() {
-    navigator.clipboard.writeText(publicUrl);
+    const copy = (text: string) => {
+      const el = document.createElement('textarea');
+      el.value = text;
+      el.style.position = 'fixed';
+      el.style.opacity = '0';
+      document.body.appendChild(el);
+      el.focus();
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    };
+
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(publicUrl).catch(() => copy(publicUrl));
+    } else {
+      copy(publicUrl);
+    }
+
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   async function handleDelete() {
@@ -109,7 +129,7 @@ export default function SubmissionsList({
             onClick={copyLink}
             className="bg-ink text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-ink/90 transition-colors whitespace-nowrap"
           >
-            Copy
+            {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
       </div>
