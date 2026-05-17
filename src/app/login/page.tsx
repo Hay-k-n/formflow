@@ -73,12 +73,6 @@ function LoginForm() {
         {loading ? 'Signing in...' : 'Sign In'}
       </button>
 
-      <p className="text-center text-sm text-muted pt-1">
-        No account?{' '}
-        <Link href="/signup" className="text-accent hover:underline font-medium">
-          Create one
-        </Link>
-      </p>
     </form>
   );
 }
@@ -88,10 +82,12 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8 animate-fade-up">
-          <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">
-            F
+          <div className="w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+            <svg viewBox="0 0 28 28" fill="none" className="w-12 h-12">
+              <path d="M4 4h20v12H14v8H4V4z" fill="#e84040"/>
+            </svg>
           </div>
-          <h1 className="font-display text-3xl text-ink">FormFlow</h1>
+          <h1 className="font-sans text-3xl font-bold tracking-widest text-ink">UCENA</h1>
           <p className="text-muted text-sm mt-1">Sign in to manage your forms</p>
         </div>
 

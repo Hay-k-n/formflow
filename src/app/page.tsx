@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createServerSupabase } from '@/lib/supabase-server';
 import SignOutButton from '@/components/SignOutButton';
-import DeleteFormButton from '@/components/DeleteFormButton';
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
@@ -62,7 +61,6 @@ export default async function DashboardPage() {
                   <span className="font-medium text-ink">{form.title || 'Untitled Form'}</span>
                   <span className="text-sm text-muted">{count} submission{count !== 1 ? 's' : ''}</span>
                 </Link>
-                <DeleteFormButton formId={form.id} />
               </div>
             );
           })}

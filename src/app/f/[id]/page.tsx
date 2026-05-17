@@ -26,7 +26,7 @@ export default async function PublicFormPage({
       <div className="w-full max-w-lg">
         <FormRenderer form={form as Form} />
         <p className="text-center text-xs text-muted/50 mt-10">
-          Powered by <span className="font-display">FormFlow</span>
+          Powered by <span className="font-display">Ucena Technologies</span>
         </p>
       </div>
     </main>

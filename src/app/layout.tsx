@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'FormFlow',
+  title: 'UCENA',
   description: 'Create forms, collect submissions, get PDFs by email.',
 };
 

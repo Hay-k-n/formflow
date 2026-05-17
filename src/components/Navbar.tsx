@@ -23,10 +23,10 @@ export default function Navbar() {
     <nav className="border-b border-border bg-white/60 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-7 h-7 bg-accent rounded-lg flex items-center justify-center text-white text-sm font-bold group-hover:rotate-6 transition-transform">
-            F
-          </div>
-          <span className="font-display text-xl text-ink">FormFlow</span>
+          <svg viewBox="0 0 28 28" fill="none" className="w-7 h-7 group-hover:scale-110 transition-transform">
+            <path d="M4 4h20v12H14v8H4V4z" fill="#e84040"/>
+          </svg>
+          <span className="font-sans text-xl font-bold tracking-widest text-ink">UCENA</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
