@@ -20,6 +20,9 @@ export default function SubmissionsList({
   const [linkToken, setLinkToken] = useState(form.link_token);
   const [showRegenerateModal, setShowRegenerateModal] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [localSubmissions, setLocalSubmissions] = useState(submissions);
+  const [confirmDeleteSubmission, setConfirmDeleteSubmission] = useState<string | null>(null);
+  const [deletingSubmission, setDeletingSubmission] = useState<string | null>(null);
   const publicUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/f/${linkToken}`;
 
   function copyLink() {
@@ -69,6 +72,19 @@ export default function SubmissionsList({
       }
     } catch {
       setDuplicating(false);
+    }
+  }
+
+  async function handleDeleteSubmission(submissionId: string) {
+    setDeletingSubmission(submissionId);
+    try {
+      const res = await fetch(`/api/submissions/${submissionId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setLocalSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+        setConfirmDeleteSubmission(null);
+      }
+    } finally {
+      setDeletingSubmission(null);
     }
   }
 
@@ -239,13 +255,13 @@ export default function SubmissionsList({
       )}
 
       {/* Submissions */}
-      {submissions.length === 0 ? (
+      {localSubmissions.length === 0 ? (
         <div className="border-2 border-dashed border-border rounded-xl p-12 text-center">
           <p className="text-muted">No submissions yet. Share the link above to start collecting responses.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {submissions.map((sub, idx) => (
+          {localSubmissions.map((sub, idx) => (
             <details
               key={sub.id}
               className="bg-white border border-border rounded-xl overflow-hidden group"
@@ -253,7 +269,7 @@ export default function SubmissionsList({
               <summary className="px-4 py-3 cursor-pointer hover:bg-surface/50 transition-colors flex items-center justify-between list-none">
                 <div className="flex items-center gap-3">
                   <span className="w-7 h-7 bg-surface rounded-full flex items-center justify-center text-xs text-muted font-medium">
-                    {submissions.length - idx}
+                    {localSubmissions.length - idx}
                   </span>
                   <span className="text-sm text-ink font-medium">
                     {form.fields[0] && sub.data[form.fields[0].id]
@@ -271,7 +287,7 @@ export default function SubmissionsList({
                 </span>
               </summary>
               <div className="border-t border-border px-4 py-4 space-y-3">
-                {form.fields.map((field) => (
+                {form.fields.filter((f) => f.type !== 'page_break').map((field) => (
                   <div key={field.id}>
                     <p className="text-xs text-muted font-medium">{field.label}</p>
                     <p className="text-sm text-ink mt-0.5 whitespace-pre-wrap">
@@ -279,6 +295,34 @@ export default function SubmissionsList({
                     </p>
                   </div>
                 ))}
+
+                <div className="pt-2 border-t border-border">
+                  {confirmDeleteSubmission === sub.id ? (
+                    <div className="flex items-center gap-3">
+                      <p className="text-xs text-red-600 flex-1">Delete this submission? This cannot be undone.</p>
+                      <button
+                        onClick={() => handleDeleteSubmission(sub.id)}
+                        disabled={deletingSubmission === sub.id}
+                        className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                      >
+                        {deletingSubmission === sub.id ? 'Deleting…' : 'Yes, delete'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteSubmission(null)}
+                        className="text-xs text-muted hover:text-ink px-3 py-1.5 rounded-lg border border-border hover:border-ink/30 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteSubmission(sub.id)}
+                      className="text-xs text-muted hover:text-red-500 transition-colors"
+                    >
+                      Delete submission
+                    </button>
+                  )}
+                </div>
               </div>
             </details>
           ))}
