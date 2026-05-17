@@ -169,7 +169,7 @@ export default function FormRenderer({ form }: { form: Form }) {
               />
             ) : (
               <input
-                type={field.type}
+                type={field.type === 'organization' ? 'text' : field.type}
                 value={formData[field.id] || ''}
                 onChange={(e) => updateValue(field.id, e.target.value)}
                 placeholder={field.placeholder}

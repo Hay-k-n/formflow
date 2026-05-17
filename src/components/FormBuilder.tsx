@@ -11,6 +11,7 @@ const FIELD_TYPES = [
   { value: 'select', label: 'Dropdown' },
   { value: 'multiselect', label: 'Multi-select' },
   { value: 'datetime', label: 'Date' },
+  { value: 'organization', label: 'Organization' },
 ] as const;
 
 function generateId() {
@@ -216,7 +217,11 @@ export default function FormBuilder({ form }: { form?: Form }) {
                   }
                   className="border border-border rounded-lg px-3 py-2 text-sm bg-surface"
                 >
-                  {FIELD_TYPES.map((t) => (
+                  {FIELD_TYPES.filter((t) =>
+                    t.value !== 'organization' ||
+                    field.type === 'organization' ||
+                    !fields.some((f) => f.type === 'organization')
+                  ).map((t) => (
                     <option key={t.value} value={t.value}>
                       {t.label}
                     </option>

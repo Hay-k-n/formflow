@@ -57,10 +57,13 @@ export async function POST(
   // 4. Generate PDF and send email (non-blocking for the user response)
   try {
     const pdfBuffer = generateSubmissionPDF(typedForm, data);
+    const orgField = typedForm.fields.find((f) => f.type === 'organization');
+    const organization = orgField ? String(data[orgField.id] || '').trim() || undefined : undefined;
     await sendSubmissionEmail({
       to: typedForm.email_to,
       formTitle: typedForm.title,
       pdfBuffer,
+      organization,
     });
   } catch (emailErr) {
     // Log but don't fail the submission — the data is already saved

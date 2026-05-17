@@ -6,15 +6,21 @@ export async function sendSubmissionEmail({
   to,
   formTitle,
   pdfBuffer,
+  organization,
 }: {
   to: string;
   formTitle: string;
   pdfBuffer: Buffer;
+  organization?: string;
 }) {
+  const subject = organization
+    ? `FF: ${formTitle} : ${organization}`
+    : `FF: ${formTitle}`;
+
   const { data, error } = await resend.emails.send({
     from: 'FormFlow <noreply@ucena.com>',
     to: [to],
-    subject: `New submission: ${formTitle}`,
+    subject,
     html: `
       <div style="font-family: sans-serif; max-width: 480px;">
         <h2 style="color: #1a1a2e;">New Form Submission</h2>
