@@ -45,7 +45,7 @@ export async function POST(
   const { error: insertError } = await supabase
     .from('submissions')
     .insert({
-      form_id: params.id,
+      form_id: typedForm.id,
       data,
     });
 
