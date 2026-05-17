@@ -56,6 +56,12 @@ export default function SubmissionsList({
 
   return (
     <div className="space-y-6">
+      {/* Back button */}
+      <a href="/" className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink transition-colors">
+        <svg viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4"><path d="M10.5 3L5.5 8l5 5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Back to forms
+      </a>
+
       {/* Header */}
       <div className="animate-fade-up">
         <div className="flex items-start justify-between">
