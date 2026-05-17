@@ -60,6 +60,15 @@ export async function DELETE(
 ) {
   const supabase = getSupabaseAdmin();
 
+  const { error: subError } = await supabase
+    .from('submissions')
+    .delete()
+    .eq('form_id', params.id);
+
+  if (subError) {
+    return NextResponse.json({ error: subError.message }, { status: 500 });
+  }
+
   const { error } = await supabase
     .from('forms')
     .delete()
