@@ -48,6 +48,7 @@ export async function PUT(
 
   revalidatePath(`/forms/${params.id}`);
   revalidatePath(`/forms/${params.id}/edit`);
+  revalidatePath(`/f/${params.id}`);
 
   return NextResponse.json(data);
 }
