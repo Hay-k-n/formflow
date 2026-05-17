@@ -23,7 +23,7 @@ export default async function PublicFormPage({
 
   return (
     <>
-      <header className="w-full bg-[#1e2024] px-6 py-4">
+      <header className="w-full bg-[#1e2024] px-6 py-4 sticky top-0 z-50">
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <img src="/ucena-logo.png" alt="UCENA" className="h-14 w-auto" />
         </div>
