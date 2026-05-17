@@ -10,26 +10,27 @@ export default function FormRenderer({ form }: { form: Form }) {
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Split fields into pages at page_break markers
+  // Split fields into pages at page_break markers, carrying the section title
   const pages = form.fields.reduce((acc, field) => {
     if (field.type === 'page_break') {
-      acc.push([]);
+      acc.push({ title: field.label || '', fields: [] });
     } else {
-      acc[acc.length - 1].push(field);
+      acc[acc.length - 1].fields.push(field);
     }
     return acc;
-  }, [[]] as (typeof form.fields)[]);
+  }, [{ title: '', fields: [] }] as { title: string; fields: typeof form.fields }[]);
 
   const totalPages = pages.length;
   const isLastPage = currentPage === totalPages - 1;
-  const pageFields = pages[currentPage] ?? [];
+  const pageFields = pages[currentPage]?.fields ?? [];
+  const pageTitle = pages[currentPage]?.title ?? '';
 
   function updateValue(fieldId: string, value: string) {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
   }
 
   function validatePage(pageIndex: number) {
-    for (const field of pages[pageIndex]) {
+    for (const field of pages[pageIndex].fields) {
       if (field.required && !formData[field.id]?.trim() && !formData[field.id]?.split(',').filter(Boolean).length) {
         return `"${field.label}" is required`;
       }
@@ -107,6 +108,10 @@ export default function FormRenderer({ form }: { form: Form }) {
           </div>
         )}
       </div>
+
+      {pageTitle && (
+        <h2 className="font-display text-xl text-ink">{pageTitle}</h2>
+      )}
 
       <div className="space-y-5 animate-fade-up-delay">
         {pageFields.map((field) => (

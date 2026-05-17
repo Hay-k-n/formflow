@@ -43,7 +43,7 @@ export default function FormBuilder({ form }: { form?: Form }) {
   function addPageBreak() {
     setFields([
       ...fields,
-      { id: generateId(), label: 'Page Break', type: 'page_break', required: false },
+      { id: generateId(), label: '', type: 'page_break', required: false },
     ]);
   }
 
@@ -166,7 +166,13 @@ export default function FormBuilder({ form }: { form?: Form }) {
                 </div>
                 <div className="flex-1 flex items-center gap-3">
                   <div className="flex-1 border-t-2 border-dashed border-accent/40" />
-                  <span className="text-xs font-semibold text-accent uppercase tracking-wider">Page Break</span>
+                  <input
+                    type="text"
+                    value={field.label}
+                    onChange={(e) => updateField(index, { label: e.target.value })}
+                    placeholder="Section title..."
+                    className="text-xs font-semibold text-accent uppercase tracking-wider bg-transparent border border-dashed border-accent/40 rounded px-2 py-0.5 focus:outline-none focus:border-accent w-40 text-center placeholder:text-accent/30"
+                  />
                   <div className="flex-1 border-t-2 border-dashed border-accent/40" />
                 </div>
                 <button type="button" onClick={() => removeField(index)} className="text-muted hover:text-red-500 text-lg px-1 transition-colors">×</button>
