@@ -58,7 +58,7 @@ export default function FormRenderer({ form }: { form: Form }) {
 
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/submit/${form.id}`, {
+      const res = await fetch(`/api/submit/${form.link_token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: formData }),
