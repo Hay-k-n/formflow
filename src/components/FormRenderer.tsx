@@ -31,7 +31,7 @@ export default function FormRenderer({ form }: { form: Form }) {
 
   function validatePage(pageIndex: number) {
     for (const field of pages[pageIndex].fields) {
-      if (field.required && !formData[field.id]?.trim() && !formData[field.id]?.split(',').filter(Boolean).length) {
+      if (field.required && !formData[field.id]?.trim() && !formData[field.id]?.split('\n').filter(Boolean).length) {
         return `"${field.label}" is required`;
       }
     }
@@ -148,7 +148,7 @@ export default function FormRenderer({ form }: { form: Form }) {
             ) : field.type === 'multiselect' ? (
               <div className="space-y-2">
                 {(field.options || []).map((opt) => {
-                  const selected = (formData[field.id] || '').split(',').filter(Boolean);
+                  const selected = (formData[field.id] || '').split('\n').filter(Boolean);
                   const checked = selected.includes(opt);
                   return (
                     <label key={opt} className="flex items-center gap-2.5 cursor-pointer">
@@ -159,7 +159,7 @@ export default function FormRenderer({ form }: { form: Form }) {
                           const next = checked
                             ? selected.filter((v) => v !== opt)
                             : [...selected, opt];
-                          updateValue(field.id, next.join(','));
+                          updateValue(field.id, next.join('\n'));
                         }}
                         className="rounded border-border accent-accent w-4 h-4"
                       />
