@@ -8,22 +8,55 @@ export default function FormRenderer({ form }: { form: Form }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // Split fields into pages at page_break markers
+  const pages = form.fields.reduce((acc, field) => {
+    if (field.type === 'page_break') {
+      acc.push([]);
+    } else {
+      acc[acc.length - 1].push(field);
+    }
+    return acc;
+  }, [[]] as (typeof form.fields)[]);
+
+  const totalPages = pages.length;
+  const isLastPage = currentPage === totalPages - 1;
+  const pageFields = pages[currentPage] ?? [];
 
   function updateValue(fieldId: string, value: string) {
     setFormData((prev) => ({ ...prev, [fieldId]: value }));
+  }
+
+  function validatePage(pageIndex: number) {
+    for (const field of pages[pageIndex]) {
+      if (field.required && !formData[field.id]?.trim() && !formData[field.id]?.split(',').filter(Boolean).length) {
+        return `"${field.label}" is required`;
+      }
+    }
+    return null;
+  }
+
+  function handleNext() {
+    const err = validatePage(currentPage);
+    if (err) { setError(err); return; }
+    setError('');
+    setCurrentPage((p) => p + 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleBack() {
+    setError('');
+    setCurrentPage((p) => p - 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
-    // Validate required fields
-    for (const field of form.fields) {
-      if (field.required && !formData[field.id]?.trim() && !formData[field.id]?.split(',').filter(Boolean).length) {
-        setError(`"${field.label}" is required`);
-        return;
-      }
-    }
+    const err = validatePage(currentPage);
+    if (err) { setError(err); return; }
 
     setSubmitting(true);
     try {
@@ -67,10 +100,18 @@ export default function FormRenderer({ form }: { form: Form }) {
         {form.description && (
           <p className="text-muted">{form.description}</p>
         )}
+        {totalPages > 1 && (
+          <div className="mt-3 flex items-center gap-2">
+            {pages.map((_, i) => (
+              <div key={i} className={`h-1.5 rounded-full flex-1 transition-colors ${i <= currentPage ? 'bg-accent' : 'bg-border'}`} />
+            ))}
+            <span className="text-xs text-muted ml-1 whitespace-nowrap">{currentPage + 1} / {totalPages}</span>
+          </div>
+        )}
       </div>
 
       <div className="space-y-5 animate-fade-up-delay">
-        {form.fields.map((field) => (
+        {pageFields.map((field) => (
           <div key={field.id}>
             <label className="block text-sm font-medium text-ink mb-1.5">
               {field.label}
@@ -140,13 +181,34 @@ export default function FormRenderer({ form }: { form: Form }) {
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-accent text-white py-3 rounded-xl font-semibold text-base hover:bg-accent/90 disabled:opacity-50 transition-colors"
-      >
-        {submitting ? 'Submitting...' : 'Submit'}
-      </button>
+      <div className="flex gap-3">
+        {currentPage > 0 && (
+          <button
+            type="button"
+            onClick={handleBack}
+            className="flex-1 border border-border text-ink py-3 rounded-xl font-semibold text-base hover:bg-surface transition-colors"
+          >
+            Back
+          </button>
+        )}
+        {isLastPage ? (
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex-1 bg-accent text-white py-3 rounded-xl font-semibold text-base hover:bg-accent/90 disabled:opacity-50 transition-colors"
+          >
+            {submitting ? 'Submitting...' : 'Submit'}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="flex-1 bg-accent text-white py-3 rounded-xl font-semibold text-base hover:bg-accent/90 transition-colors"
+          >
+            Next
+          </button>
+        )}
+      </div>
     </form>
   );
 }

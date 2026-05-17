@@ -38,6 +38,13 @@ export default function FormBuilder({ form }: { form?: Form }) {
     ]);
   }
 
+  function addPageBreak() {
+    setFields([
+      ...fields,
+      { id: generateId(), label: 'Page Break', type: 'page_break', required: false },
+    ]);
+  }
+
   function updateField(index: number, updates: Partial<FormField>) {
     setFields(fields.map((f, i) => (i === index ? { ...f, ...updates } : f)));
   }
@@ -58,12 +65,13 @@ export default function FormBuilder({ form }: { form?: Form }) {
     e.preventDefault();
     setError('');
 
+    const realFields = fields.filter((f) => f.type !== 'page_break');
     if (!title.trim()) return setError('Give your form a title');
     if (!emailTo.trim()) return setError('Enter an email to receive submissions');
-    if (fields.length === 0) return setError('Add at least one field');
-    if (fields.some((f) => !f.label.trim())) return setError('All fields need a label');
+    if (realFields.length === 0) return setError('Add at least one field');
+    if (realFields.some((f) => !f.label.trim())) return setError('All fields need a label');
 
-    const selectWithoutOptions = fields.find(
+    const selectWithoutOptions = realFields.find(
       (f) => (f.type === 'select' || f.type === 'multiselect') && (!f.options || f.options.length === 0)
     );
     if (selectWithoutOptions)
@@ -137,7 +145,7 @@ export default function FormBuilder({ form }: { form?: Form }) {
           <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">
             Fields
           </h3>
-          <span className="text-xs text-muted">{fields.length} field{fields.length !== 1 && 's'}</span>
+          <span className="text-xs text-muted">{fields.filter(f => f.type !== 'page_break').length} field{fields.filter(f => f.type !== 'page_break').length !== 1 && 's'}</span>
         </div>
 
         {fields.length === 0 && (
@@ -146,7 +154,25 @@ export default function FormBuilder({ form }: { form?: Form }) {
           </div>
         )}
 
-        {fields.map((field, index) => (
+        {fields.map((field, index) => {
+          if (field.type === 'page_break') {
+            return (
+              <div key={field.id} className="flex items-center gap-3 py-1">
+                <div className="flex flex-col gap-0.5">
+                  <button type="button" onClick={() => moveField(index, -1)} disabled={index === 0} className="text-muted hover:text-ink text-xs p-0.5">▲</button>
+                  <button type="button" onClick={() => moveField(index, 1)} disabled={index === fields.length - 1} className="text-muted hover:text-ink text-xs p-0.5">▼</button>
+                </div>
+                <div className="flex-1 flex items-center gap-3">
+                  <div className="flex-1 border-t-2 border-dashed border-accent/40" />
+                  <span className="text-xs font-semibold text-accent uppercase tracking-wider">Page Break</span>
+                  <div className="flex-1 border-t-2 border-dashed border-accent/40" />
+                </div>
+                <button type="button" onClick={() => removeField(index)} className="text-muted hover:text-red-500 text-lg px-1 transition-colors">×</button>
+              </div>
+            );
+          }
+
+          return (
           <div
             key={field.id}
             className="bg-white border border-border rounded-xl p-4 space-y-3 hover:border-accent/30 transition-colors"
@@ -265,15 +291,25 @@ export default function FormBuilder({ form }: { form?: Form }) {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
 
-        <button
-          type="button"
-          onClick={addField}
-          className="w-full border-2 border-dashed border-border rounded-xl py-3 text-sm text-muted hover:border-accent hover:text-accent transition-colors"
-        >
-          + Add Field
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={addField}
+            className="flex-1 border-2 border-dashed border-border rounded-xl py-3 text-sm text-muted hover:border-accent hover:text-accent transition-colors"
+          >
+            + Add Field
+          </button>
+          <button
+            type="button"
+            onClick={addPageBreak}
+            className="border-2 border-dashed border-border rounded-xl px-4 py-3 text-sm text-muted hover:border-accent hover:text-accent transition-colors whitespace-nowrap"
+          >
+            + Page Break
+          </button>
+        </div>
       </div>
 
       {/* Error */}
